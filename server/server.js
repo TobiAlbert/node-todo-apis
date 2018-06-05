@@ -1,56 +1,26 @@
-var mongoose = require('mongoose');
+var express = require('express'),
+    bodyParser = require('body-parser');
 
-// use promises on mongoose
-mongoose.Promise = global.Promise;
-// connect mongoose to db
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+var {mongoose} = require('./db/mongoose'),
+    {Todo} = require('./models/todo'),
+    {User} = require('./models/user');
 
-// create model
-var Todo = mongoose.model('Todo', {
-  text: {
-    type: String,
-    required: true,
-    minlength: 1,
-    trim: true // removes leading or trailing white spaces
-  },
-  completed: {
-    type: Boolean,
-    default: false
-  },
-  completedAt: {
-    type: Number,
-    default: null
-  }
+var app = express();
+app.use(bodyParser.json());
+
+app.post('/todos', (req, res) => {
+  var todo = new Todo({
+    text: req.body.text
+  });
+
+  todo.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
-// var newTodo = new Todo({
-//   text: ' Edit this '
-// });
-
-
-// newTodo.save().then((doc) => {
-//   console.log('Saved todo', doc);
-// }, (err) => {
-//   console.log('Unable to save Todo')
-// });
-
-// User
-// email - require - trim - set min length
-var User = mongoose.model('User', {
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 8
-  }
+app.listen(3000, () => {
+  console.log('Server listening on port 3000');
 });
 
-var newUser = new User({
-  email: 'saji@gmail.com'
-});
-
-newUser.save().then((doc) => {
-  console.log('Saved User', doc);
-}, (err) => {
-  console.log('Unable to add User');
-});
