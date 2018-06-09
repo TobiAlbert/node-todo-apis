@@ -8,6 +8,8 @@ const {mongoose} = require('./db/mongoose'),
       {User} = require('./models/user');
 
 var app = express();
+const port = process.env.PORT || 3000;
+
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
@@ -51,8 +53,26 @@ app.get('/todos/:id', (req, res) => {
   
 });
 
-app.listen(3000, () => {
-  console.log('Server listening on port 3000');
+app.delete("/todos/:id", (req, res) => {
+  // get the id
+  const id = req.params.id;
+  //validate id, not id? send 404
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send()
+  }
+  // remove by id => success and error
+  Todo.findByIdAndRemove(id).then((doc) => {
+    if(!doc) {
+      res.status(404).send()
+    }
+    res.status(200).send(doc);
+  }).catch((err) => {
+    res.status(400).send();
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
 
 module.exports = {app};
